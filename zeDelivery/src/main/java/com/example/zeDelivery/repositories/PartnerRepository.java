@@ -7,6 +7,5 @@ import com.example.zeDelivery.domain.Partner;
 
 @Repository
 public interface PartnerRepository extends JpaRepository<Partner, Long> {
-
     Partner findById(String tradingName);
 }
