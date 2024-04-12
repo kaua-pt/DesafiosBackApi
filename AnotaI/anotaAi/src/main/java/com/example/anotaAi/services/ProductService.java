@@ -1,51 +1,55 @@
 package com.example.anotaAi.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.anotaAi.domain.category.Category;
 import com.example.anotaAi.domain.product.Product;
 import com.example.anotaAi.domain.product.ProductDTO;
 import com.example.anotaAi.domain.product.exceptions.ProductNotFoundException;
-import com.example.anotaAi.repositories.CategoryRepository;
 import com.example.anotaAi.repositories.ProductRepository;
 
 @Service
 public class ProductService {
     private ProductRepository productRepository;
-    private CategoryRepository categoryRepository;
+    private CategoryService categoryService;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CategoryService categoryService) {
         this.productRepository = productRepository;
-
+        this.categoryService = categoryService;
     }
 
-    public Product insert(ProductDTO ProductData) {
-        Product newProduct = new Product(ProductData);
-        this.repository.save(newProduct);
+    public Product insert(ProductDTO productData) {
+        Optional<Category> category = this.categoryService.findById(productData.category().getId());
+
+        Product newProduct = new Product(productData);
+        newProduct.setCategory(category.get());
+        this.productRepository.save(newProduct);
         return newProduct;
     }
 
     public List<Product> getAll() {
-        return this.repository.findAll();
+        return this.productRepository.findAll();
     }
 
-    public Product update(ProductDTO ProductData, String id) throws ProductNotFoundException {
+    public Product update(ProductDTO productData, String id) throws ProductNotFoundException {
 
-        Product newProduct = this.repository.findById(id).orElseThrow(ProductNotFoundException::new);
+        Product newProduct = this.productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
 
-        if (!ProductData.title().isEmpty())
-            newProduct.setTitle(ProductData.title());
-        if (!ProductData.description().isEmpty())
-            newProduct.setDescription(ProductData.description());
+        if (!productData.title().isEmpty())
+            newProduct.setTitle(productData.title());
+        if (!productData.description().isEmpty())
+            newProduct.setDescription(productData.description());
 
-        this.repository.save(newProduct);
+        this.productRepository.save(newProduct);
 
         return newProduct;
     }
 
     public void delete(String id) throws ProductNotFoundException {
-        Product newProduct = this.repository.findById(id).orElseThrow(ProductNotFoundException::new);
-        this.repository.delete(newProduct);
+        Product newProduct = this.productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
+        this.productRepository.delete(newProduct);
     }
 }
