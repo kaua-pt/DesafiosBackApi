@@ -37,11 +37,16 @@ public class ProductService {
     public Product update(ProductDTO productData, String id) throws ProductNotFoundException {
 
         Product newProduct = this.productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
+        if (productData.category().getId() != null)
+            this.categoryService.findById(productData.category().getId())
+                    .ifPresent(newProduct::setCategory);
 
         if (!productData.title().isEmpty())
             newProduct.setTitle(productData.title());
         if (!productData.description().isEmpty())
             newProduct.setDescription(productData.description());
+        if (productData.price() == null)
+            newProduct.setPrice(productData.price());
 
         this.productRepository.save(newProduct);
 
